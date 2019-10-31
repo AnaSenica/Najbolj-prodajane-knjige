@@ -70,19 +70,14 @@ vzorec_filma = re.compile(
     r'<td><i><a.*?title=".*?">(?P<film>.*?)</a></i>.*?</td>.*?'
     r'<td>(?P<leto_filma>.*?)</td>.*?'
     r'<td>(.*?<a.*?title=".*?">)?(?P<reziser>.*?)(</a>.*?)?</td>.*?'
-    r'<td>(<a href=".*?" title=".*?">)?(?P<drzave>.*?)(</a>)?</td>.*?'
+    r'(?P<drzave><td>(<a href=".*?" title=".*?">)?.*?(</a>)?</td>.*?)'
     r'<td>(<i>)?(")?(<a.*?title=".*?">)?(?P<knjiga>.*?)(</a>)?(</i>|").*?</td>.*?'
-    r'<td>(")?(<a.*?title=".*?">)?(?P<avtor>.*?)(</a>)?"?</td>.*?'
+    r'(?P<avtor><td>(")?(<a.*?title=".*?">)?.*?(</a>)?"?</td>.*?)'
     r'<td>(?P<leto_izida_knjige>(\d\d\d)?.*?)</td>.*?'
     r'<td>(?P<zvrst>.*?)\n.*?</td></tr>'
     ,
     re.DOTALL
 )
-
-
-
-
-
 
 
 
@@ -131,35 +126,79 @@ def books_from_file2(ime_datoteke, lokacija_datoteke):
     return seznam
 
 def mala_books_frontpage():
-    return books_from_file2('filmi1.html', mapa)
+    return books_from_file2('filmi3.html', mapa)
 
 #mala_books_frontpage()
+#books_from_file2('filmi3.html', mapa)
 
-vzorec_povezave = re.compile(
-    r'<a.*?>(.+?)</a>',
+
+vzorec_z_a = re.compile(
+    r'<td>.*?<a .*?>(.+?)</a>.*?(</td>)?\n',
+    flags=re.DOTALL
+)
+vzorec_brez_a = re.compile(
+    r'<td>(.+?)</td>\n',
+    flags=re.DOTALL
+)
+vzorec_brez_a_konec = re.compile(
+    r'(.+?)</td>\n',
+    flags=re.DOTALL
+)
+vzorec_z_a_konec = re.compile(
+    r'<a.*?>(.+?)</a>.*?</td>\n',
+    flags=re.DOTALL
+)
+vzorec_brez_a_zacetek = re.compile(
+    r'<td>(.+?)',
+    flags=re.DOTALL
+)
+vzorec_z_a_zacetek = re.compile(
+    r'<td>(<a .*?>.*?</a>.*?)?.*?<a .*?>(.+?)</a>(.*)?',
+    flags=re.DOTALL
+)
+vzorec_z_a_sredina = re.compile(
+    r'<a .*?>(.+?)</a>',
     flags=re.DOTALL
 )
 
-vzorec_avtorja1 = re.compile(
-    r'(.+?)</a>.*?<a href=".*?">(.*?)'
-)
-vzorec_avtorja2 = re.compile(
-    r'(.+?)</a><sup'
-)
 
 
+def pomozna_funkcija(film, kategorija):
+    film = film
+    if ' &amp; ' not in film[kategorija]:
+        if '<a' not in film[kategorija]:
+            film[kategorija] = [vzorec_brez_a.sub(r'\1', film[kategorija])]
+        else:
+            film[kategorija] = [vzorec_z_a.sub(r'\1', film[kategorija])]
+    else:
+        seznam = []
+        elementi = re.split(', | &amp; ', film[kategorija])
+        for e in elementi:
+            if '<td>' in e:
+                if '<a' not in e:
+                    seznam.append(vzorec_brez_a_zacetek.sub(r'\1', e))
+                else:
+                    seznam.append(vzorec_z_a_zacetek.sub(r'\2', e))
+            elif '</td>' in e:
+                if '<a' not in e:
+                    seznam.append(vzorec_brez_a_konec.sub(r'\1', e))
+                else:
+                    seznam.append(vzorec_z_a_konec.sub(r'\1', e))
+            else:
+                if '<a'  in e:
+                    seznam.append(vzorec_z_a_sredina.sub(r'\1', e))
+                else:
+                    seznam.append(e)
+        film[kategorija] = seznam
+    return film
+
+
+########################################################################
 def popravi_podatke(blok):
     film = vzorec_filma.search(blok).groupdict()
-    lepe_drzave = vzorec_povezave.sub(r'\1', film['drzave'])
-    film['drzave'] = [d for d in lepe_drzave.replace(',', '').split()]
-    if '</a><sup' in film['avtor']:
-        film['avtor'] = [vzorec_avtorja2.sub(r'\1', film['avtor'])]
-    elif '</a>' in film['avtor']:
-        lepi_avtorji = []
-        lepi_avtorji.append(vzorec_avtorja1.sub(r'\1', film['avtor']))
-        lepi_avtorji.append(vzorec_avtorja1.sub(r'\2', film['avtor']))
-        film['avtor'] = [a for a in lepi_avtorji]
-    
-    
-    return film
+    pomozna_funkcija(film, 'drzave')
+    pomozna_funkcija(film, 'avtor')
+    pomozna_funkcija(film, 'reziser')
+    print(film['reziser']) 
+    #return film
 
