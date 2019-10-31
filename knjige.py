@@ -4,7 +4,7 @@ import re
 import requests
 
 # URL glavne spletne strani: Wikipedia
-knjige_url = 'https://en.wikipedia.org/wiki/List_of_best-selling_books#List_of_best-selling_individual_books'
+knjige_url = 'https://en.wikipedia.org/wiki/List_of_book-based_war_films_(1945%E2%80%932000_wars)'
 # mapa, v katero bom shranila podatke
 mapa = 'knjige'
 # ime datoteke, v katero bom shranila glavno stran
@@ -50,6 +50,7 @@ def save_frontpage(page, directory, filename):
 # ads_from_file = books_from_file
 # ads_frontpage = books_frontpage
 
+
 def read_file_to_string(directory, filename):
     """Funkcija vrne celotno vsebino datoteke "directory"/"filename" kot niz"""
     path = os.path.join(directory, filename)
@@ -60,36 +61,35 @@ def read_file_to_string(directory, filename):
 def page_to_books(page_content):
     """Funkcija poišče posamezne knjige, ki se nahajajo v spletni strani in
     vrne njih seznam"""
-    # (.*?) pomeni katerikoli znak, od 0 naprej, ? pomeni, da ni požrešen način. Torej pobere čim manj, kolikor je možno.
-    # modul .DOTALL na knjižnici re poskrbi, da pika pomeni katerikoli znak, tudi presledke (če ni dotall, pika pomeni katerikoli znak razen presledkov)
-    izraz = re.compile(r'<div class="ad">(.*?)<div class="clear">', re.DOTALL)
+    izraz = re.compile(r'<tr>.*?<td><i><a (.*?)</td></tr>', re.DOTALL)
     return [m.group(0) for m in re.finditer(izraz, page_content)]
 
-# Da preverim delovanje te funkcije, vstavim npr. tole: niz = ' <div class="ad"><div class="clear"></div></div><div class="ad"><div class="coloumn image"><td><a titl<div class="clear">'
+# Da preverim delovanje te funkcije, vstavim npr. tole: niz = ' <tr><td><i><a href="/wiki/The_Red_Danube" title="The Red Danube">The Red Danube</a></i></td><td>1949</td><td><a href="/wiki/George_Sidney" title="George Sidney">George Sidney</a></td><td>US</td><td><i><a href="/wiki/Vespers_in_Vienna" title="Vespers in Vienna">Vespers in Vienna</a></i></td><td><a href="/wiki/Bruce_Marshall" title="Bruce Marshall">Bruce Marshall</a></td><td>1947</td><td>Novel</td></tr><tr>'
 
-# Definirajte funkcijo, ki sprejme niz, ki predstavlja oglas, in izlušči
-# podatke o imenu, ceni in opisu v oglasu.
-
+vzorec_filma = re.compile(
+    r'<td><i><a.*?title=".*?">(?P<film>.*?)</a></i>.*?</td>.*?'
+    r'<td>(?P<leto_filma>.*?)</td>.*?'
+    r'<td>(.*?<a.*?title=".*?">)?(?P<reziser>.*?)(</a>.*?)?</td>.*?'
+    r'<td>(<a href=".*?" title=".*?">)?(?P<drzave>.*?)(</a>)?</td>.*?'
+    r'<td>(<i>)?(")?(<a.*?title=".*?">)?(?P<knjiga>.*?)(</a>)?(</i>|").*?</td>.*?'
+    r'<td>(")?(<a.*?title=".*?">)?(?P<avtor>.*?)(</a>)?"?</td>.*?'
+    r'<td>(?P<leto_izida_knjige>(\d\d\d)?.*?)</td>.*?'
+    r'<td>(?P<zvrst>.*?)\n.*?</td></tr>'
+    ,
+    re.DOTALL
+)
 
 def get_dict_from_book_block(blok):
     """Funkcija iz niza za posamezno knjigo izlušči podatke o ........ imenu, ceni
     in opisu ter vrne slovar, ki vsebuje ustrezne podatke
     """
-    izraz = re.compile(
-        r'<h3><a title="(?P<ime>.*?)"'
-        r'.*?>(?P<opis>.*?)</a></h3>'
-        r'.*?class="price">(<span>)?(?P<cena>.*?)( €</span>)?</div',
-        re.DOTALL
-    )
+    izraz = vzorec_filma
     podatki = re.search(izraz, blok)
-    # .groupdict() vrne slovar POIMENOVANIH spremenljivk 
     slovar = podatki.groupdict()
     return slovar
 
-# Da preverim delovanje te funkcije, vstavim npr. tole:
-#'<span class="flag_newAd"></span>         </div><div class="coloumn content"><h3><a title="Gusarka Loti (DZZŽ Kranj)" href="http://www4103">Gusarka Loti (DZZŽ Kranj)</a></h3><div class="price">Po dogovoru</div>  <div class="clear"></div>  <div class="miscellaneous">'
 
-
+#[get_dict_from_book_block(knjiga) for knjiga in page_to_books(read_file_to_string(mapa, 'filmi3.html'))]
 
 # Definirajte funkcijo, ki sprejme ime in lokacijo datoteke, ki vsebuje
 # besedilo spletne strani, in vrne seznam slovarjev, ki vsebujejo podatke o
