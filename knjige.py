@@ -79,6 +79,18 @@ vzorec_filma = re.compile(
     re.DOTALL
 )
 
+
+
+
+
+
+
+
+
+
+
+
+
 def get_dict_from_book_block(blok):
     """Funkcija iz niza za posamezno knjigo izlušči podatke o ........ imenu, ceni
     in opisu ter vrne slovar, ki vsebuje ustrezne podatke
@@ -106,3 +118,48 @@ def books_from_file(ime_datoteke, lokacija_datoteke):
 
 def books_frontpage():
     return books_from_file(glavna_stran, mapa)
+
+
+
+
+def books_from_file2(ime_datoteke, lokacija_datoteke):
+    """Funkcija prebere podatke v datoteki "directory"/"filename" in jih
+    pretvori (razčleni) v pripadajoč seznam slovarjev za vsako knjigo posebej."""
+    stran = read_file_to_string(lokacija_datoteke, ime_datoteke)
+    knjige = page_to_books(stran)
+    seznam = [popravi_podatke(knjiga) for knjiga in knjige]
+    return seznam
+
+def mala_books_frontpage():
+    return books_from_file2('filmi1.html', mapa)
+
+#mala_books_frontpage()
+
+vzorec_povezave = re.compile(
+    r'<a.*?>(.+?)</a>',
+    flags=re.DOTALL
+)
+
+vzorec_avtorja1 = re.compile(
+    r'(.+?)</a>.*?<a href=".*?">(.*?)'
+)
+vzorec_avtorja2 = re.compile(
+    r'(.+?)</a><sup'
+)
+
+
+def popravi_podatke(blok):
+    film = vzorec_filma.search(blok).groupdict()
+    lepe_drzave = vzorec_povezave.sub(r'\1', film['drzave'])
+    film['drzave'] = [d for d in lepe_drzave.replace(',', '').split()]
+    if '</a><sup' in film['avtor']:
+        film['avtor'] = [vzorec_avtorja2.sub(r'\1', film['avtor'])]
+    elif '</a>' in film['avtor']:
+        lepi_avtorji = []
+        lepi_avtorji.append(vzorec_avtorja1.sub(r'\1', film['avtor']))
+        lepi_avtorji.append(vzorec_avtorja1.sub(r'\2', film['avtor']))
+        film['avtor'] = [a for a in lepi_avtorji]
+    
+    
+    return film
+
