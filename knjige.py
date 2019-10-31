@@ -81,19 +81,14 @@ vzorec_filma = re.compile(
 
 
 
-
-
-
-
-
-def get_dict_from_book_block(blok):
-    """Funkcija iz niza za posamezno knjigo izlušči podatke o ........ imenu, ceni
-    in opisu ter vrne slovar, ki vsebuje ustrezne podatke
-    """
-    izraz = vzorec_filma
-    podatki = re.search(izraz, blok)
-    slovar = podatki.groupdict()
-    return slovar
+#def get_dict_from_book_block(blok):
+#    """Funkcija iz niza za posamezno knjigo izlušči podatke o ........ imenu, ceni
+#    in opisu ter vrne slovar, ki vsebuje ustrezne podatke
+#    """
+##    izraz = vzorec_filma
+ #   podatki = re.search(izraz, blok)
+ #   slovar = podatki.groupdict()
+  #  return slovar
 
 
 #[get_dict_from_book_block(knjiga) for knjiga in page_to_books(read_file_to_string(mapa, 'filmi3.html'))]
@@ -102,22 +97,13 @@ def get_dict_from_book_block(blok):
 # besedilo spletne strani, in vrne seznam slovarjev, ki vsebujejo podatke o
 # vseh oglasih strani.
 
-
-def books_from_file(ime_datoteke, lokacija_datoteke):
-    """Funkcija prebere podatke v datoteki "directory"/"filename" in jih
-    pretvori (razčleni) v pripadajoč seznam slovarjev za vsako knjigo posebej."""
-    stran = read_file_to_string(lokacija_datoteke, ime_datoteke)
-    knjige = page_to_books(stran)
-    seznam = [get_dict_from_book_block(knjiga) for knjiga in knjige]
-    return seznam
-
 def books_frontpage():
     return books_from_file(glavna_stran, mapa)
 
 
 
 
-def books_from_file2(ime_datoteke, lokacija_datoteke):
+def books_from_file(ime_datoteke, lokacija_datoteke):
     """Funkcija prebere podatke v datoteki "directory"/"filename" in jih
     pretvori (razčleni) v pripadajoč seznam slovarjev za vsako knjigo posebej."""
     stran = read_file_to_string(lokacija_datoteke, ime_datoteke)
@@ -126,10 +112,10 @@ def books_from_file2(ime_datoteke, lokacija_datoteke):
     return seznam
 
 def mala_books_frontpage():
-    return books_from_file2('filmi3.html', mapa)
+    return books_from_file('filmi3.html', mapa)
 
 #mala_books_frontpage()
-#books_from_file2('filmi3.html', mapa)
+#books_from_file('filmi3.html', mapa)
 
 
 vzorec_z_a = re.compile(
@@ -160,16 +146,29 @@ vzorec_z_a_sredina = re.compile(
     r'<a .*?>(.+?)</a>',
     flags=re.DOTALL
 )
+poseben_vzorec_drzave = re.compile(
+    r'<td>(.+?)<sup.*?><a .*?>.*?</a>.*?(</td>)?\n',
+    flags=re.DOTALL
+)
+vzorec_brez_b = re.compile(
+    r'<b>(.+?)</b>',
+    flags=re.DOTALL
+)
+vzorec_brez_sup = re.compile(
+    r'(.+?)<sup.*?>.*?</sup>',
+    flags=re.DOTALL
+)
 
-
-
-def pomozna_funkcija(film, kategorija):
+def pomozna_funkcija1(film, kategorija):
     film = film
     if ' &amp; ' not in film[kategorija]:
         if '<a' not in film[kategorija]:
             film[kategorija] = [vzorec_brez_a.sub(r'\1', film[kategorija])]
         else:
-            film[kategorija] = [vzorec_z_a.sub(r'\1', film[kategorija])]
+            if kategorija == 'drzave' and '<sup' in film[kategorija]:
+                film[kategorija] = [poseben_vzorec_drzave.sub(r'\1', film[kategorija])]
+            else:
+                film[kategorija] = [vzorec_z_a.sub(r'\1', film[kategorija])]
     else:
         seznam = []
         elementi = re.split(', | &amp; ', film[kategorija])
@@ -192,13 +191,46 @@ def pomozna_funkcija(film, kategorija):
         film[kategorija] = seznam
     return film
 
+def pomozna_funkcija_zvrst(film, kategorija):
+    film = film
+    if '/<br />' in film[kategorija]:
+        elementi = re.split('/<br />|/', film[kategorija])
+        film[kategorija] = [e for e in elementi]
+    else:
+        film[kategorija] = [film[kategorija]]
+    for e in film[kategorija]:
+        seznam = []
+        if '<b>' in e:
+            seznam.append(vzorec_brez_b.sub(r'\1', e))
+        elif '<sup' in e:
+            seznam.append(vzorec_brez_sup.sub(r'\1', e))
+        elif '<a' in e:
+            seznam.append(vzorec_z_a_sredina.sub(r'\1', e))
+        else:
+            seznam.append(e)
+        film[kategorija] = seznam
+    return film
+
+def pomozna_funkcija_leto_knjige(film, kategorija):
+    film = film
+    if film[kategorija] == '?':
+        film[kategorija] = None
+    else:
+        popravljene_letnice = film[kategorija].replace('?', '0')
+        film[kategorija] = popravljene_letnice[:4]
+    return film
+
+
+    
 
 ########################################################################
 def popravi_podatke(blok):
     film = vzorec_filma.search(blok).groupdict()
-    pomozna_funkcija(film, 'drzave')
-    pomozna_funkcija(film, 'avtor')
-    pomozna_funkcija(film, 'reziser')
-    print(film['reziser']) 
+    pomozna_funkcija1(film, 'drzave')
+    pomozna_funkcija1(film, 'avtor')
+    pomozna_funkcija1(film, 'reziser')
+    pomozna_funkcija_zvrst(film, 'zvrst')
+    pomozna_funkcija_leto_knjige(film, 'leto_izida_knjige')
+    print(film['leto_izida_knjige'])
     #return film
 
