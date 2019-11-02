@@ -271,5 +271,5 @@ def zapisi_csv(slovarji, imena_polj, ime_datoteke):
 #zapisi_csv(FILMI, ['id', 'film', 'leto_filma', 'knjiga', 'leto_izida_knjige'], 'filmi_po_knjigah.csv')
 #zapisi_csv(reziser, ['film_id', 'reziser'], 'reziserji.csv')
 #zapisi_csv(avtor, ['film_id', 'avtor'], 'avtorji_knjig.csv')
-#zapisi_csv(zvrst, ['film_id', 'zvrst'], 'zvrsti_filma.csv')
+#zapisi_csv(zvrst, ['film_id', 'zvrst'], 'zvrsti_knjige.csv')
 #zapisi_csv(drzave, ['film_id', 'drzave'], 'drzave.csv')
