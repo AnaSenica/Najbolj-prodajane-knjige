@@ -9,8 +9,7 @@ knjige_url = 'https://en.wikipedia.org/wiki/List_of_book-based_war_films_(1945%E
 mapa = 'knjige'
 # ime datoteke, v katero bom shranila glavno stran
 glavna_stran = 'knjge_stran.html'
-# ime CSV datoteke, v katero bom shranila podatke
-csv_datoteka = 'filmi_po_knjigah.csv'
+
 
 def download_url_to_string(url):
     """Funkcija kot argument sprejme niz in puskuša vrniti vsebino te spletne
@@ -108,9 +107,11 @@ vzorec_brez_krnekej = re.compile(
 )
 def pomozna_funkcija1(film, kategorija):
     film = film
-    if ' &amp; ' not in film[kategorija]:
+    if ' &amp; ' not in film[kategorija] and ', ' not in film[kategorija]:
         if '<a' not in film[kategorija]:
             film[kategorija] = [vzorec_brez_a.sub(r'\1', film[kategorija])]
+            if '?' in film[kategorija][0]:
+                film[kategorija][0] = film[kategorija][0].replace('?', '')
         else:
             if kategorija == 'drzave' and '<sup' in film[kategorija]:
                 film[kategorija] = [poseben_vzorec_drzave.sub(r'\1', film[kategorija])]
@@ -141,7 +142,7 @@ def pomozna_funkcija1(film, kategorija):
 def pomozna_funkcija_zvrst(film, kategorija):
     film = film
     if '/<br />' in film[kategorija]:
-        elementi = re.split('/<br />|/', film[kategorija])
+        elementi = re.split('/<br />', film[kategorija])
         film[kategorija] = [e for e in elementi]
     else:
         film[kategorija] = [film[kategorija]]
@@ -156,6 +157,10 @@ def pomozna_funkcija_zvrst(film, kategorija):
         else:
             seznam.append(e)
         film[kategorija] = seznam
+    for i in film[kategorija]:
+        if '/' in i:
+            elementi = re.split('/', i)
+            film[kategorija] = [e for e in elementi]
     return film
 
 def pomozna_funkcija_leto_knjige(film, kategorija):
@@ -237,13 +242,13 @@ def izloci_gnezdene_podatke(filmi):
     reziser, avtor, zvrst, drzave = [], [], [], []
     for film in filmi:
         for z in film.pop('zvrst'):
-            zvrst.append({'film': film['id'], 'zvrst': z})
+            zvrst.append({'film_id': film['id'], 'zvrst': z})
         for a in film.pop('avtor'):
-            avtor.append({'film': film['id'], 'avtor': a})
+            avtor.append({'film_id': film['id'], 'avtor': a})
         for r in film.pop('reziser'):
-            reziser.append({'film': film['id'], 'reziser': r})
+            reziser.append({'film_id': film['id'], 'reziser': r})
         for d in film.pop('drzave'):
-            drzave.append({'film': film['id'], 'drzave': d})
+            drzave.append({'film_id': film['id'], 'drzave': d})
     return reziser, avtor, zvrst, drzave
 
 def pripravi_imenik(ime_datoteke):
@@ -261,5 +266,10 @@ def zapisi_csv(slovarji, imena_polj, ime_datoteke):
         for slovar in slovarji:
             writer.writerow(slovar)
 
-
-#zapisi_csv(zapisi_seznam_filmov(), ['id', 'film', 'leto_filma', 'knjiga', 'leto_izida_knjige'], csv_datoteka)
+#FILMI = zapisi_seznam_filmov()
+#reziser, avtor, zvrst, drzave = izloci_gnezdene_podatke(FILMI)
+#zapisi_csv(FILMI, ['id', 'film', 'leto_filma', 'knjiga', 'leto_izida_knjige'], 'filmi_po_knjigah.csv')
+#zapisi_csv(reziser, ['film_id', 'reziser'], 'reziserji.csv')
+#zapisi_csv(avtor, ['film_id', 'avtor'], 'avtorji_knjig.csv')
+#zapisi_csv(zvrst, ['film_id', 'zvrst'], 'zvrsti_filma.csv')
+#zapisi_csv(drzave, ['film_id', 'drzave'], 'drzave.csv')
