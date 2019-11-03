@@ -108,9 +108,7 @@ vzorec_brez_krnekej = re.compile(
 def pomozna_funkcija1(film, kategorija):
     film = film
     if ', Jr.' in film[kategorija]:
-        print(film[kategorija])
         film[kategorija] = [vzorec_z_a.sub(r'\1', film[kategorija])]
-        print(film[kategorija])
     elif 'Capt.' in film[kategorija]:
         film[kategorija] = [vzorec_z_a_zacetek.sub(r'\2', film[kategorija])]
     elif ' &amp; ' not in film[kategorija] and ', ' not in film[kategorija]:
@@ -143,20 +141,21 @@ def pomozna_funkcija1(film, kategorija):
                 else:
                     seznam.append(e)
         film[kategorija] = seznam
-    if kategorija == 'drzava':
+    if kategorija == 'drzave':
         for i in film[kategorija]:
             if 'U.S.' in i:
+                print(i)
                 nov_i = i.replace('.', '')
                 film[kategorija].remove(i)
                 film[kategorija].append(nov_i)
+                print(i)
     elif kategorija == 'avtor':
         for i in film[kategorija]:
             if '"' in i:
-                #print(i)
                 nov_i = i.replace('"', '')
                 film[kategorija].remove(i)
                 film[kategorija].append(nov_i)
-                #print(i)
+                
     return film
 
 
