@@ -107,7 +107,13 @@ vzorec_brez_krnekej = re.compile(
 )
 def pomozna_funkcija1(film, kategorija):
     film = film
-    if ' &amp; ' not in film[kategorija] and ', ' not in film[kategorija]:
+    if ', Jr.' in film[kategorija]:
+        print(film[kategorija])
+        film[kategorija] = [vzorec_z_a.sub(r'\1', film[kategorija])]
+        print(film[kategorija])
+    elif 'Capt.' in film[kategorija]:
+        film[kategorija] = [vzorec_z_a_zacetek.sub(r'\2', film[kategorija])]
+    elif ' &amp; ' not in film[kategorija] and ', ' not in film[kategorija]:
         if '<a' not in film[kategorija]:
             film[kategorija] = [vzorec_brez_a.sub(r'\1', film[kategorija])]
             if '?' in film[kategorija][0]:
@@ -137,7 +143,22 @@ def pomozna_funkcija1(film, kategorija):
                 else:
                     seznam.append(e)
         film[kategorija] = seznam
+    if kategorija == 'drzava':
+        for i in film[kategorija]:
+            if 'U.S.' in i:
+                nov_i = i.replace('.', '')
+                film[kategorija].remove(i)
+                film[kategorija].append(nov_i)
+    elif kategorija == 'avtor':
+        for i in film[kategorija]:
+            if '"' in i:
+                #print(i)
+                nov_i = i.replace('"', '')
+                film[kategorija].remove(i)
+                film[kategorija].append(nov_i)
+                #print(i)
     return film
+
 
 def pomozna_funkcija_zvrst(film, kategorija):
     film = film
@@ -158,7 +179,9 @@ def pomozna_funkcija_zvrst(film, kategorija):
             seznam.append(e)
         film[kategorija] = seznam
     for i in film[kategorija]:
-        if '/' in i:
+        if '?' in i:
+            film[kategorija] = [i.replace('?', '')]
+        elif '/' in i:
             elementi = re.split('/', i)
             film[kategorija] = [e for e in elementi]
     return film
@@ -182,8 +205,6 @@ def pomozna_funkcija_knjiga(film, kategorija):
         elif '&#160;: roman' in film[kategorija]:
             film[kategorija] = vzorec_brez_krnekej.sub(r'\1', film[kategorija])
     return film
-
-
 
 
 ########################################################################
@@ -210,6 +231,8 @@ def popravi_podatke(blok):
     pomozna_funkcija_zvrst(film, 'zvrst')
     pomozna_funkcija_leto_knjige(film, 'leto_izida_knjige')
     pomozna_funkcija_knjiga(film, 'knjiga')
+    #print(film['drzave'])
+    #print(film['zvrst'])
     return film
 
 
@@ -266,10 +289,10 @@ def zapisi_csv(slovarji, imena_polj, ime_datoteke):
         for slovar in slovarji:
             writer.writerow(slovar)
 
-#FILMI = zapisi_seznam_filmov()
-#reziser, avtor, zvrst, drzave = izloci_gnezdene_podatke(FILMI)
-#zapisi_csv(FILMI, ['id', 'film', 'leto_filma', 'knjiga', 'leto_izida_knjige'], 'filmi_po_knjigah.csv')
-#zapisi_csv(reziser, ['film_id', 'reziser'], 'reziserji.csv')
-#zapisi_csv(avtor, ['film_id', 'avtor'], 'avtorji_knjig.csv')
-#zapisi_csv(zvrst, ['film_id', 'zvrst'], 'zvrsti_knjige.csv')
-#zapisi_csv(drzave, ['film_id', 'drzave'], 'drzave.csv')
+FILMI = zapisi_seznam_filmov()
+reziser, avtor, zvrst, drzave = izloci_gnezdene_podatke(FILMI)
+zapisi_csv(FILMI, ['id', 'film', 'leto_filma', 'knjiga', 'leto_izida_knjige'], 'filmi_po_knjigah.csv')
+zapisi_csv(reziser, ['film_id', 'reziser'], 'reziserji.csv')
+zapisi_csv(avtor, ['film_id', 'avtor'], 'avtorji_knjig.csv')
+zapisi_csv(zvrst, ['film_id', 'zvrst'], 'zvrsti_knjige.csv')
+zapisi_csv(drzave, ['film_id', 'drzave'], 'drzave.csv')

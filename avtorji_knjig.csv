@@ -69,9 +69,7 @@ film_id,avtor
 66,Nicholas von Hoffman
 67,Edmundo Desnoes
 68,Robert F. Kennedy
-69,"<td><a href=""/wiki/Arthur_M._Schlesinger,_Jr."" class=""mw-redirect"" title=""Arthur M. Schlesinger"
-69,"Jr."">Arthur M. Schlesinger"
-69,Jr.</a>
+69,"Arthur M. Schlesinger, Jr."
 70,Ernest May
 70,Philip Zelikow
 71,Sam Rolfe
@@ -79,9 +77,7 @@ film_id,avtor
 73,Harry Kullman
 74,Tom Clancy
 75,Peter Huchthausen
-75,Igor Kurdin
-75,R. Alan White
-76,Capt.
+76,Peter Huchthausen
 77,Aleksandr Pokrovsky
 78,Eugene Burdick
 78,Harvey Wheeler
@@ -139,7 +135,7 @@ film_id,avtor
 128,Robert Holles
 129,Ernest Hemingway
 130,Graham Greene
-131,"Ernesto ""Che"" Guevara"
+131,Ernesto Che Guevara
 132,Miguel de Cervantes
 133,Jean Lartéguy
 134,Pierre Schoendoerffer
@@ -169,10 +165,8 @@ film_id,avtor
 156,Christopher Robbins
 157,Stephen Coonts
 158,Gustav Hasford
-159,"<td>Rear Adm. <a href=""/wiki/Jeremiah_Denton"" title=""Jeremiah Denton"">Jeremiah A. Denton"
-159,Jr.</a> with Ed. Brandt
-160,"<td><a href=""/wiki/James_Kirkwood,_Jr."" class=""mw-redirect"" title=""James Kirkwood"
-160,"Jr."">James Kirkwood</a>"
+159,"Jeremiah A. Denton, Jr."
+160,James Kirkwood
 161,John McCain
 162,Dieter Dengler
 163,Daniel Lang
@@ -197,7 +191,7 @@ film_id,avtor
 180,Bob Woodward
 181,Wilbur Smith
 182,Conrad Black
-183,"Ernesto ""Che"" Guevara"
+183,Ernesto Che Guevara
 184,Daniel Carney
 185,Michael Hartmann
 186,Bernard MacLaverty
