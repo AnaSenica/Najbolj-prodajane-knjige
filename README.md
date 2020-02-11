@@ -19,5 +19,3 @@ Delovne hipoteze:
 
 Podatki, pripravljeni za analizo, so v CSV datotekah: filmi_po_knjigah.csv vsebuje filme, knjige, po katerih so bili posneti in letnice izida filmov in knjig; drzave.csv vsebuje države, v katerih je bil film posnet; avtorji_knjig.csv in reziserji.csv vsebujeta vse pisatelje in režiserje, ki so sodelovali pri filmu ali knjigi; zvrsti_knjige.csv vsebuje zvrsti knjig, po katerih so bili posneti filmi. Podatki so indeksirani glede na film, h kateremu sodijo.
 V knjige.py je koda, ki sem jo uporabila za zajem podatkov.
-
-(Moja prvotna tema je bila Najbolj prodajane knjige, a sem ugotovila, da je bilo knjig na seznamu premalo, zato sem temo spremenila.)
